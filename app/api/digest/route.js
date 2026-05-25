@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  defaultHeaders: { "anthropic-beta": "web-search-2025-03-05" },
 });
 export async function POST(request) {
   let body;
