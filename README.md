@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Digest
 
-## Getting Started
+An AI news agent that tracks signals, surfaces stories, and connects the dots across topics you care about.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## What it does
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Choose up to five topics, pick a signal type, and The Digest runs a live web search and writes you a structured briefing in seconds.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+| Signal | What you get |
+|---|---|
+| **Latest** | Breaking news from the last 48 hours — named sources, key figures, and why each story matters. |
+| **Pulse** | Trending GitHub repos and Hacker News discussions gaining momentum right now. |
+| **Long-form** | Substacks and essays worth your time — arguments and ideas, not just headlines. |
+| **Research** | Recent papers and breakthroughs from arxiv and academic journals, last 30 days. |
+| **Connect** | Hidden threads linking your topics together — patterns others haven't spotted yet. |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Each story includes a source link and a plain-English "explain simply" button powered by Claude Haiku.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Live demo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[ai-news-agent-gules.vercel.app](https://ai-news-agent-gules.vercel.app)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Run your own
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+You'll need [Node.js](https://nodejs.org) (LTS) and an Anthropic API key (see below).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Local setup**
+
+1. Fork this repo on GitHub, then clone your fork:
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/ai-news-agent.git
+   cd ai-news-agent
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file in the project root and add your key:
+   ```
+   ANTHROPIC_API_KEY=your-key-here
+   ```
+4. Start the dev server:
+   ```bash
+   npm run dev
+   ```
+5. Open [localhost:3000](http://localhost:3000).
+
+For a full deployment walkthrough, see [martina-edwards.vercel.app](https://martina-edwards.vercel.app).
+
+---
+
+## Get an API key
+
+Create one at [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys). You'll need to add a payment method, but you won't be charged until you use it. A typical digest run costs a few cents.
+
+Set a monthly spending cap in the Anthropic console before sharing your deployment with anyone.
+
+---
+
+## Built with
+
+- [Next.js](https://nextjs.org) (App Router)
+- [Claude Sonnet](https://anthropic.com) — digest generation with live web search
+- [Claude Haiku](https://anthropic.com) — plain-English story explanations
+- [Vercel](https://vercel.com) — hosting
+
+---
+
+## About
+
+Built by [Martina Edwards](https://martina-edwards.vercel.app) — AI acceleration specialist and the person behind the portfolio this project lives alongside.
+
+---
+
+MIT licence.
