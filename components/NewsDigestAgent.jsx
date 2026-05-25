@@ -177,106 +177,8 @@ function parseDigest(text) {
   if (section) sections.push(section);
   return sections;
 }
-
-// ─── Setup Screen ─────────────────────────────────────────────────────────────
-function SetupScreen({ onKey }) {
-  const [input, setInput] = useState("");
-  const [show, setShow]   = useState(false);
-  const [err, setErr]     = useState("");
-
-  const submit = () => {
-    const k = input.trim();
-    if (!k.startsWith("sk-ant-")) {
-      setErr("That doesn't look like an Anthropic API key — it should start with sk-ant-");
-      return;
-    }
-    onKey(k);
-  };
-
-  return (
-    <div style={{ minHeight:"100vh", background:"#0c0c0f", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 24px", fontFamily:"Georgia, serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500&family=Lato:wght@300;400&display=swap');
-        * { box-sizing:border-box; margin:0; padding:0; }
-        .setup-input { width:100%; background:#0a0a0d; border:1px solid #252535; color:#ede9e3; padding:11px 14px; font-family:'IBM Plex Mono',monospace; font-size:12px; border-radius:2px; outline:none; letter-spacing:0.04em; transition:border-color 0.15s; }
-        .setup-input:focus { border-color:#e8c54755; }
-        .setup-input::placeholder { color:#2a2a3a; }
-        .setup-btn { width:100%; padding:12px; background:#e8c547; color:#0c0c0f; border:none; border-radius:2px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; transition:opacity 0.2s; margin-top:10px; }
-        .setup-btn:hover { opacity:0.85; }
-        .show-btn { background:transparent; border:none; color:#3a3a55; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:0.06em; padding:0 2px; }
-        .show-btn:hover { color:#666; }
-      `}</style>
-
-      <div style={{ maxWidth:420, width:"100%" }}>
-        {/* Logo */}
-        <div style={{ marginBottom:32, textAlign:"center" }}>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:32, fontWeight:900, letterSpacing:"-0.02em", color:"#ede9e3" }}>
-            THE DIGEST
-          </div>
-          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#3a3a50", letterSpacing:"0.14em", textTransform:"uppercase", marginTop:5 }}>
-            AI-Powered News Intelligence
-          </div>
-        </div>
-
-        {/* Card */}
-        <div style={{ background:"#0f0f14", border:"1px solid #1e1e28", borderRadius:3, padding:"28px 24px" }}>
-          <div style={{ fontFamily:"'Playfair Display',serif", fontSize:17, color:"#ede9e3", marginBottom:8, lineHeight:1.3 }}>
-            Enter your Anthropic API key to get started
-          </div>
-          <p style={{ fontFamily:"'Lato',sans-serif", fontWeight:300, fontSize:13, color:"#5a5a72", lineHeight:1.65, marginBottom:20 }}>
-            The Digest runs entirely in your browser. Your key is sent directly to Anthropic and never stored or shared with anyone else.
-          </p>
-
-          <div style={{ position:"relative", marginBottom: err ? 8 : 16 }}>
-            <input
-              className="setup-input"
-              type={show ? "text" : "password"}
-              placeholder="sk-ant-api03-..."
-              value={input}
-              onChange={e => { setInput(e.target.value); setErr(""); }}
-              onKeyDown={e => e.key === "Enter" && submit()}
-              style={{ paddingRight:60 }}
-            />
-            <button className="show-btn" onClick={() => setShow(s => !s)}
-              style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)" }}>
-              {show ? "hide" : "show"}
-            </button>
-          </div>
-
-          {err && (
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color:"#ef4444", marginBottom:12, lineHeight:1.5 }}>
-              {err}
-            </div>
-          )}
-
-          <button className="setup-btn" onClick={submit}>
-            Get started →
-          </button>
-
-          <div style={{ marginTop:20, paddingTop:16, borderTop:"1px solid #141420" }}>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#2d2d3a", letterSpacing:"0.06em", lineHeight:1.8 }}>
-              Don't have a key?{" "}
-              <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer"
-                style={{ color:"#e8c54788", textDecoration:"none" }}>
-                console.anthropic.com ↗
-              </a>
-              <br />
-              Typical cost: ~$0.05–0.10 per digest · ~$0.001 per explanation
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginTop:16, textAlign:"center", fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#1e1e2a", letterSpacing:"0.06em" }}>
-          Open source · MIT licence · github.com/your-username/the-digest
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function NewsDigestAgent() {
-  const [apiKey, setApiKey]           = useState("");
   const [topics, setTopics]           = useState(["AI", "Technology"]);
   const [signalId, setSignalId]       = useState("news");
   const [inputVal, setInputVal]       = useState("");
@@ -287,9 +189,6 @@ export default function NewsDigestAgent() {
   const [done, setDone]               = useState(false);
   const [explanations, setExplanations] = useState({});
   const logRef = useRef(null);
-
-  // Show setup screen until key is provided
-  if (!apiKey) return <SetupScreen onKey={setApiKey} />;
 
   const currentSig = SIGNALS.find(s => s.id === signalId);
 
@@ -312,19 +211,14 @@ export default function NewsDigestAgent() {
     // Fetch from Haiku — much cheaper than Sonnet, no tools needed
     setExplanations(p => ({ ...p, [key]: { text: "", loading: true, visible: true } }));
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-dangerous-direct-browser-access": "true" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 350,
-          system: "You explain news stories in plain, friendly language for someone with zero background knowledge. No jargon. Short sentences. One concrete analogy where it helps. 3–4 sentences max. Don't start with 'This article' or 'This story'.",
-          messages: [{
-            role: "user",
-            content: `Explain this simply:\n\n${story.headline}\n\n${story.body.join(" ")}`
-          }]
-        })
-      });
+      const res = await fetch("/api/explain", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    headline: story.headline,
+    body: story.body.join(" "),
+  }),
+});
       const data = await res.json();
       const text = data.content?.filter(b => b.type === "text").map(b => b.text).join("") || "Could not generate explanation.";
       setExplanations(p => ({ ...p, [key]: { text, loading: false, visible: true } }));
@@ -357,18 +251,16 @@ export default function NewsDigestAgent() {
 
     try {
       const date = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-dangerous-direct-browser-access": "true" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4000,
-          tools: [{ type: "web_search_20250305", name: "web_search" }],
-          system: sig.system,
-          messages: [{ role: "user", content: sig.userPrompt(topics, date) }],
-        }),
-      });
-
+      const res = await fetch("/api/digest", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    topics,
+    signalSystem: sig.system,
+    signalUserPrompt: sig.userPrompt(topics, date),
+    signalLabel: sig.label,
+  }),
+});
       if (!res.ok) throw new Error((await res.json()).error?.message || `HTTP ${res.status}`);
       const data = await res.json();
 
