@@ -24,7 +24,9 @@ Source: [Publication Name](https://actual-url.com)
 [Summary.]
 *Why it matters: [Insight.]*
 
-— 2 stories per topic. Prioritise news from the last 48 hours. Be direct and specific. Always include a real Source line with a working URL from your search results. No filler.`,
+— 2 stories per topic. Prioritise news from the last 48 hours. Be direct and specific. Always include a real Source line with a working URL from your search results. No filler.
+
+Treat each topic as an AI industry vertical. Models = foundation models and labs. Infra = compute, chips, data centres, cloud AI. Regulation = AI policy, safety, governance. Products = AI product launches, integrations, and enterprise tools.`,
     userPrompt: (topics, date) =>
       `Today is ${date}. Generate a news digest covering: ${topics.join(", ")}.`,
   },
@@ -48,7 +50,9 @@ Source: [Site Name](https://actual-url.com)
 [Summary.]
 *Signal: [Significance.]*
 
-— Search GitHub trending, Hacker News Show HN, recent product launches, fast-moving technical discussions. Find things that weren't on everyone's radar a week ago. Always include a real Source URL. Be exact with names and numbers.`,
+— Search GitHub trending, Hacker News Show HN, recent product launches, fast-moving technical discussions. Find things that weren't on everyone's radar a week ago. Always include a real Source URL. Be exact with names and numbers.
+
+Treat each topic as an AI industry vertical. Models = foundation models and labs. Infra = compute, chips, data centres, cloud AI. Regulation = AI policy, safety, governance. Products = AI product launches, integrations, and enterprise tools.`,
     userPrompt: (topics, date) =>
       `Today is ${date}. What's gaining fast traction right now in: ${topics.join(", ")}? Search GitHub trending repos, Hacker News, new product launches, viral technical discussions. Find the signals others haven't caught yet.`,
   },
@@ -72,7 +76,9 @@ Source: [Author · Publication Name](https://actual-url.com)
 [Summary.]
 *Key insight: [Insight.]*
 
-— Search substack.com, beehiiv newsletters, and recently shared essays. Always include a real Source URL from your search. Prioritise pieces with real engagement. Be specific about author and publication names. Don't invent articles.`,
+— Search substack.com, beehiiv newsletters, and recently shared essays. Always include a real Source URL from your search. Prioritise pieces with real engagement. Be specific about author and publication names. Don't invent articles.
+
+Treat each topic as an AI industry vertical. Models = foundation models and labs. Infra = compute, chips, data centres, cloud AI. Regulation = AI policy, safety, governance. Products = AI product launches, integrations, and enterprise tools.`,
     userPrompt: (topics, date) =>
       `Today is ${date}. Find notable Substack articles, newsletters, and long-form essays recently published or getting significant attention on: ${topics.join(", ")}. Search substack.com directly.`,
   },
@@ -96,7 +102,9 @@ Source: [Institution / Journal](https://actual-url.com)
 [Summary.]
 *Why it matters: [Implication.]*
 
-— Prioritise papers from the last 30 days. Search arxiv.org directly by topic. Always include a real Source URL. Be specific about who did the research, where, and what the concrete finding was. Don't be vague.`,
+— Prioritise papers from the last 30 days. Search arxiv.org directly by topic. Always include a real Source URL. Be specific about who did the research, where, and what the concrete finding was. Don't be vague.
+
+Treat each topic as an AI industry vertical. Models = foundation models and labs. Infra = compute, chips, data centres, cloud AI. Regulation = AI policy, safety, governance. Products = AI product launches, integrations, and enterprise tools.`,
     userPrompt: (topics, date) =>
       `Today is ${date}. Find recent research papers, discoveries, and breakthroughs in: ${topics.join(", ")}. Search arxiv.org and academic sources. Focus on work from the last 30 days.`,
   },
@@ -122,14 +130,23 @@ Source: [Publication / Site](https://actual-url.com)
 [2–3 sentences: another data point from a different topic that supports this thread.]
 *Why this thread matters: [What it changes about how you'd think about the connected topics.]*
 
-— Surface 2–3 threads with 2 evidence points each. Always include real Source URLs. The best threads make someone say: "I hadn't connected those two things, but now I can't unsee it." Find the structural ones.`,
+— Surface 2–3 threads with 2 evidence points each. Always include real Source URLs. The best threads make someone say: "I hadn't connected those two things, but now I can't unsee it." Find the structural ones.
+
+Treat each topic as an AI industry vertical. Models = foundation models and labs. Infra = compute, chips, data centres, cloud AI. Regulation = AI policy, safety, governance. Products = AI product launches, integrations, and enterprise tools.`,
     userPrompt: (topics, date) =>
       `Today is ${date}. Search across all of these topics and find hidden connecting threads and structural patterns between them: ${topics.join(", ")}. What links these domains together in non-obvious ways? What's moving underneath all of them simultaneously?`,
   },
 ];
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const PRESETS = ["AI", "Technology", "Finance", "Climate", "Science", "Health", "Space"];
+const PRESETS = ["Models", "Infra", "Regulation", "Products"];
+const PALETTE = {
+  Models: "#5B8FA8",
+  Infra: "#7B9E87",
+  Regulation: "#C17B5C",
+  Products: "#8B7BA8",
+};
+const topicColor = (t) => PALETTE[t] || "#308695";
 
 const SIGNAL_DESCRIPTIONS = {
   news:      "Breaking news, last 48 hours. Named sources, key figures, why it matters.",
@@ -180,7 +197,7 @@ function parseDigest(text) {
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function NewsDigestAgent() {
-  const [topics, setTopics]             = useState(["AI", "Technology"]);
+  const [topics, setTopics]             = useState(["Models", "Products"]);
   const [signalId, setSignalId]         = useState("news");
   const [loading, setLoading]           = useState(false);
   const [sections, setSections]         = useState([]);
@@ -344,7 +361,7 @@ export default function NewsDigestAgent() {
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: "0.5rem", alignItems: "center" }}>
             {topics.map((t) => (
               <span key={t} className="chip" title="Click to remove"
-                style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)", color: "var(--accent)" }}
+                style={{ background: `${topicColor(t)}18`, border: `1px solid ${topicColor(t)}55`, color: topicColor(t) }}
                 onClick={() => removeTopic(t)}>
                 {t} <span style={{ opacity: 0.4, fontSize: 13 }}>×</span>
               </span>
