@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 // ─── Signal Configurations ────────────────────────────────────────────────────
 const SIGNALS = [
   {
-    id: "news", label: "Latest", icon: "◈", color: "#e8c547",
+    id: "news", label: "Latest", icon: "◈",
     tagline: "Top stories breaking right now",
     whyLabel: "Why it matters",
     system: `You are a sharp, authoritative news digest agent. Search for today's most significant stories and write precise, editorial summaries.
@@ -29,7 +29,7 @@ Source: [Publication Name](https://actual-url.com)
       `Today is ${date}. Generate a news digest covering: ${topics.join(", ")}.`,
   },
   {
-    id: "pulse", label: "Pulse", icon: "⚡", color: "#4a9eff",
+    id: "pulse", label: "Pulse", icon: "⚡",
     tagline: "GitHub repos & fast-moving signals gaining traction",
     whyLabel: "Signal",
     system: `You are a signal detection agent tracking what's gaining momentum fast — GitHub repositories exploding in popularity, viral technical discussions, fast-moving product launches, and developments suddenly getting outsized attention.
@@ -53,7 +53,7 @@ Source: [Site Name](https://actual-url.com)
       `Today is ${date}. What's gaining fast traction right now in: ${topics.join(", ")}? Search GitHub trending repos, Hacker News, new product launches, viral technical discussions. Find the signals others haven't caught yet.`,
   },
   {
-    id: "longform", label: "Long-form", icon: "◎", color: "#a855f7",
+    id: "longform", label: "Long-form", icon: "◎",
     tagline: "Substacks & essays worth your time",
     whyLabel: "Key insight",
     system: `You are a curator of high-signal long-form content. Search specifically for notable Substack articles, newsletters, and essays recently published or gaining significant attention on the given topics.
@@ -77,7 +77,7 @@ Source: [Author · Publication Name](https://actual-url.com)
       `Today is ${date}. Find notable Substack articles, newsletters, and long-form essays recently published or getting significant attention on: ${topics.join(", ")}. Search substack.com directly.`,
   },
   {
-    id: "research", label: "Research", icon: "◉", color: "#22c55e",
+    id: "research", label: "Research", icon: "◉",
     tagline: "Papers, discoveries & breakthroughs",
     whyLabel: "Why it matters",
     system: `You are a research monitoring agent. Search for recent papers, discoveries, studies, and breakthroughs. Look at arxiv.org, Nature, Science, institutional research labs, and academic preprint servers.
@@ -101,7 +101,7 @@ Source: [Institution / Journal](https://actual-url.com)
       `Today is ${date}. Find recent research papers, discoveries, and breakthroughs in: ${topics.join(", ")}. Search arxiv.org and academic sources. Focus on work from the last 30 days.`,
   },
   {
-    id: "synthesis", label: "Connect", icon: "⬡", color: "#ec4899",
+    id: "synthesis", label: "Connect", icon: "⬡",
     tagline: "Hidden threads linking your topics together",
     whyLabel: "Why this thread matters",
     system: `You are a synthesis and pattern-recognition agent. Do NOT summarise each topic separately. Instead, search across ALL the given topics simultaneously and find hidden threads, structural patterns, and unexpected connections between them.
@@ -130,15 +130,7 @@ Source: [Publication / Site](https://actual-url.com)
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PRESETS = ["AI", "Technology", "Finance", "Climate", "Geopolitics", "Science", "Health", "Space", "Crypto", "Defence"];
-const PALETTE = {
-  AI: "#a855f7", Technology: "#4a9eff", Finance: "#e8c547", Climate: "#22c55e",
-  Geopolitics: "#ef4444", Science: "#06b6d4", Health: "#ec4899",
-  Space: "#8b5cf6", Crypto: "#f97316", Defence: "#94a3b8",
-};
-const FALLBACKS = ["#e8c547","#4a9eff","#a855f7","#22c55e","#ef4444","#06b6d4"];
-const topicColor = (t, i) => PALETTE[t] || FALLBACKS[i % FALLBACKS.length];
 
-// ─── Parser ───────────────────────────────────────────────────────────────────
 // ─── Parser ───────────────────────────────────────────────────────────────────
 function parseDigest(text) {
   const sections = [];
@@ -177,16 +169,17 @@ function parseDigest(text) {
   if (section) sections.push(section);
   return sections;
 }
+
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function NewsDigestAgent() {
-  const [topics, setTopics]           = useState(["AI", "Technology"]);
-  const [signalId, setSignalId]       = useState("news");
-  const [inputVal, setInputVal]       = useState("");
-  const [loading, setLoading]         = useState(false);
-  const [sections, setSections]       = useState([]);
-  const [steps, setSteps]             = useState([]);
-  const [error, setError]             = useState(null);
-  const [done, setDone]               = useState(false);
+  const [topics, setTopics]             = useState(["AI", "Technology"]);
+  const [signalId, setSignalId]         = useState("news");
+  const [inputVal, setInputVal]         = useState("");
+  const [loading, setLoading]           = useState(false);
+  const [sections, setSections]         = useState([]);
+  const [steps, setSteps]               = useState([]);
+  const [error, setError]               = useState(null);
+  const [done, setDone]                 = useState(false);
   const [explanations, setExplanations] = useState({});
   const logRef = useRef(null);
 
@@ -196,29 +189,22 @@ export default function NewsDigestAgent() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [steps]);
 
-  // ── Explain a single story using Haiku (cheap — no web search needed) ──
   const explainStory = async (key, story) => {
-    // Toggle off if already visible
     if (explanations[key]?.visible && explanations[key]?.text) {
       setExplanations(p => ({ ...p, [key]: { ...p[key], visible: false } }));
       return;
     }
-    // If we already fetched it, just show it
     if (explanations[key]?.text) {
       setExplanations(p => ({ ...p, [key]: { ...p[key], visible: true } }));
       return;
     }
-    // Fetch from Haiku — much cheaper than Sonnet, no tools needed
     setExplanations(p => ({ ...p, [key]: { text: "", loading: true, visible: true } }));
     try {
       const res = await fetch("/api/explain", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    headline: story.headline,
-    body: story.body.join(" "),
-  }),
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ headline: story.headline, body: story.body.join(" ") }),
+      });
       const data = await res.json();
       const text = data.content?.filter(b => b.type === "text").map(b => b.text).join("") || "Could not generate explanation.";
       setExplanations(p => ({ ...p, [key]: { text, loading: false, visible: true } }));
@@ -252,15 +238,15 @@ export default function NewsDigestAgent() {
     try {
       const date = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
       const res = await fetch("/api/digest", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    topics,
-    signalSystem: sig.system,
-    signalUserPrompt: sig.userPrompt(topics, date),
-    signalLabel: sig.label,
-  }),
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topics,
+          signalSystem: sig.system,
+          signalUserPrompt: sig.userPrompt(topics, date),
+          signalLabel: sig.label,
+        }),
+      });
       if (!res.ok) throw new Error((await res.json()).error?.message || `HTTP ${res.status}`);
       const data = await res.json();
 
@@ -285,31 +271,29 @@ export default function NewsDigestAgent() {
   const dateStr = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0c0c0f", color: "#ede9e3", fontFamily: "Georgia, serif" }}>
+    <div style={{ minHeight: "100vh", background: "var(--paper)", color: "var(--ink)", fontFamily: "var(--font-body), sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #2a2a38; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: var(--pale); border-radius: 2px; }
 
-        .chip { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:2px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; transition:opacity 0.15s; }
+        .chip { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; cursor:pointer; font-family:var(--font-mono),monospace; font-size:0.6rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; transition:opacity 0.15s; }
         .chip:hover { opacity:0.65; }
 
-        .preset { background:transparent; border:1px solid #1e1e28; color:#464658; padding:4px 10px; font-size:10px; font-family:'IBM Plex Mono',monospace; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all 0.15s; }
-        .preset:hover { border-color:#3a3a48; color:#888; }
-        .preset.on { border-color:#e8c547; color:#e8c547; background:rgba(232,197,71,0.07); }
+        .preset { background:transparent; border:1px solid var(--rule); color:var(--warm); padding:4px 10px; font-size:0.6rem; font-family:var(--font-mono),monospace; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; transition:all 0.15s; }
+        .preset:hover { border-color:var(--rule-strong); color:var(--ink-soft); }
+        .preset.on { border-color:var(--accent); color:var(--accent); background:color-mix(in srgb, var(--accent) 7%, transparent); }
 
-        .sig-btn { display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 8px; border-radius:3px; cursor:pointer; border:1px solid #1a1a22; background:transparent; transition:all 0.18s; flex:1; min-width:0; }
-        .sig-btn:hover { border-color:#2a2a38; }
-        .sig-btn.active { background:var(--active-bg); border-color:var(--active-border); }
+        .sig-btn { display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 8px; cursor:pointer; border:1px solid var(--rule); background:transparent; transition:all 0.18s; flex:1; min-width:0; }
+        .sig-btn:hover { border-color:var(--rule-strong); }
+        .sig-btn.active { background:color-mix(in srgb, var(--accent) 8%, transparent); border-color:color-mix(in srgb, var(--accent) 40%, transparent); }
 
-        .gen-btn { width:100%; padding:13px; border:none; border-radius:2px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; transition:opacity 0.2s; color:#0c0c0f; }
+        .gen-btn { width:100%; padding:13px; border:none; cursor:pointer; font-family:var(--font-mono),monospace; font-size:0.69rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; transition:opacity 0.2s; color:var(--paper); background:var(--accent); }
         .gen-btn:disabled { opacity:0.4; cursor:not-allowed; }
         .gen-btn:not(:disabled):hover { opacity:0.84; }
 
-        .topic-input { background:transparent; border:none; outline:none; color:#ede9e3; font-family:'IBM Plex Mono',monospace; font-size:11px; width:100px; }
-        .topic-input::placeholder { color:#2a2a3a; }
+        .topic-input { background:transparent; border:none; outline:none; color:var(--ink); font-family:var(--font-mono),monospace; font-size:0.6rem; width:100px; }
+        .topic-input::placeholder { color:var(--pale); }
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .fadein { animation:fadeUp 0.4s ease forwards; opacity:0; }
@@ -317,56 +301,56 @@ export default function NewsDigestAgent() {
         .blink { animation:blink 1.5s ease-in-out infinite; }
         .log-row { display:flex; gap:14px; align-items:baseline; animation:fadeUp 0.14s ease forwards; opacity:0; }
 
-        .story { padding:18px 0; border-bottom:1px solid #14141c; }
+        .story { padding:1.125rem 0; border-bottom:1px solid var(--rule); }
         .story:last-child { border-bottom:none; }
 
-        .refresh-btn { background:transparent; border:1px solid #1e1e28; color:#464658; padding:5px 12px; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all 0.15s; }
-        .refresh-btn:hover:not(:disabled) { border-color:#3a3a48; color:#888; }
+        .refresh-btn { background:transparent; border:1px solid var(--rule); color:var(--warm); padding:5px 12px; font-family:var(--font-mono),monospace; font-size:0.56rem; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:all 0.15s; }
+        .refresh-btn:hover:not(:disabled) { border-color:var(--rule-strong); color:var(--ink-soft); }
         .refresh-btn:disabled { opacity:0.3; cursor:not-allowed; }
         .headline-link:hover { opacity:0.75; }
         .source-link:hover { opacity:0.7; text-decoration:underline !important; }
-        .explain-btn { background:transparent; border:1px solid #1e1e2c; color:#3a3a55; padding:4px 10px; font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:0.08em; cursor:pointer; border-radius:2px; transition:all 0.15s; }
-        .explain-btn:hover:not(:disabled) { border-color:#4a9eff44; color:#4a9eff; }
+        .explain-btn { background:transparent; border:1px solid var(--rule); color:var(--warm); padding:4px 10px; font-family:var(--font-mono),monospace; font-size:0.56rem; letter-spacing:0.08em; cursor:pointer; transition:all 0.15s; }
+        .explain-btn:hover:not(:disabled) { border-color:color-mix(in srgb, var(--accent) 40%, transparent); color:var(--accent); }
         .explain-btn:disabled { opacity:0.35; cursor:not-allowed; }
       `}</style>
 
       {/* ── Masthead ── */}
-      <div style={{ borderBottom: "1px solid #17172050", padding: "18px 24px 14px" }}>
+      <div style={{ borderBottom: "1px solid var(--rule)", padding: "1.125rem 1.5rem 0.875rem" }}>
         <div style={{ maxWidth: 700, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1 }}>
-              THE DIGEST
+            <div style={{ fontFamily: "var(--font-heading), serif", fontSize: "1.75rem", fontWeight: 300, letterSpacing: "-0.01em", lineHeight: 1 }}>
+              The Digest
             </div>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "#3a3a50", letterSpacing: "0.12em", marginTop: 5, textTransform: "uppercase" }}>
+            <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.12em", marginTop: 5, textTransform: "uppercase" }}>
               {currentSig.tagline}
             </div>
           </div>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "#282838", textAlign: "right", letterSpacing: "0.04em" }}>
+          <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", textAlign: "right", letterSpacing: "0.04em" }}>
             <div>{dateStr}</div>
           </div>
         </div>
       </div>
 
-      <div style={{ padding: "20px 24px", maxWidth: 700, margin: "0 auto" }}>
+      <div style={{ padding: "1.25rem 1.5rem", maxWidth: 700, margin: "0 auto" }}>
 
         {/* ── Topics ── */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "#3d3d50", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>
-            Topics <span style={{ color: "#252535" }}>— up to 5, click to remove</span>
+        <div style={{ marginBottom: "1rem" }}>
+          <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+            Topics <span style={{ color: "var(--pale)" }}>— up to 5, click to remove</span>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8, alignItems: "center" }}>
-            {topics.map((t, i) => (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: "0.5rem", alignItems: "center" }}>
+            {topics.map((t) => (
               <span key={t} className="chip" title="Click to remove"
-                style={{ background: topicColor(t,i)+"18", border:`1px solid ${topicColor(t,i)}40`, color: topicColor(t,i) }}
+                style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)", color: "var(--accent)" }}
                 onClick={() => removeTopic(t)}>
-                {t} <span style={{ opacity:0.4, fontSize:13 }}>×</span>
+                {t} <span style={{ opacity: 0.4, fontSize: 13 }}>×</span>
               </span>
             ))}
             {topics.length < 5 && (
-              <span style={{ display:"inline-flex", alignItems:"center", gap:4, padding:"3px 8px", border:"1px dashed #222230", borderRadius:2 }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", border: "1px dashed var(--rule-strong)" }}>
                 <input className="topic-input" placeholder="add topic…" value={inputVal}
                   onChange={e => setInputVal(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addTopic(inputVal); }}} />
+                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addTopic(inputVal); } }} />
               </span>
             )}
           </div>
@@ -379,35 +363,30 @@ export default function NewsDigestAgent() {
         </div>
 
         {/* ── Signal selector ── */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "#3d3d50", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>
+        <div style={{ marginBottom: "1rem" }}>
+          <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
             Signal Type
           </div>
           <div style={{ display: "flex", gap: 5 }}>
             {SIGNALS.map(sig => (
               <button key={sig.id} className={`sig-btn ${signalId === sig.id ? "active" : ""}`}
-                style={{
-                  "--active-bg": sig.color + "12",
-                  "--active-border": sig.color + "50",
-                }}
                 onClick={() => { setSignalId(sig.id); setDone(false); setSections([]); setSteps([]); setError(null); }}>
-                <span style={{ fontSize: 14, lineHeight: 1, color: signalId === sig.id ? sig.color : "#333" }}>
+                <span style={{ fontSize: 14, lineHeight: 1, color: signalId === sig.id ? "var(--accent)" : "var(--warm)" }}>
                   {sig.icon}
                 </span>
-                <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, letterSpacing:"0.06em", textTransform:"uppercase", color: signalId === sig.id ? sig.color : "#424255", whiteSpace:"nowrap" }}>
+                <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", letterSpacing: "0.06em", textTransform: "uppercase", color: signalId === sig.id ? "var(--accent)" : "var(--warm)", whiteSpace: "nowrap" }}>
                   {sig.label}
                 </span>
               </button>
             ))}
           </div>
-          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#2a2a3a", marginTop:8, letterSpacing:"0.04em" }}>
+          <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", marginTop: "0.5rem", letterSpacing: "0.04em" }}>
             {currentSig.tagline}
           </div>
         </div>
 
         {/* ── Generate ── */}
-        <button className="gen-btn" style={{ background: currentSig.color }}
-          onClick={generate} disabled={loading || !topics.length}>
+        <button className="gen-btn" onClick={generate} disabled={loading || !topics.length}>
           {loading
             ? <span className="blink">Agent running…</span>
             : done ? `Refresh ${currentSig.label}` : `Generate — ${currentSig.label}`}
@@ -415,17 +394,17 @@ export default function NewsDigestAgent() {
 
         {/* ── Agent log ── */}
         {steps.length > 0 && (
-          <div style={{ marginTop:12, padding:"10px 14px", background:"#080809", border:"1px solid #141420", borderRadius:2 }}>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#2d2d3a", letterSpacing:"0.1em", textTransform:"uppercase", marginBottom:7 }}>
+          <div style={{ marginTop: "0.75rem", padding: "10px 14px", background: "var(--paper-2)", border: "1px solid var(--rule)" }}>
+            <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 7 }}>
               Agent Log
             </div>
-            <div ref={logRef} style={{ display:"flex", flexDirection:"column", gap:4, maxHeight:95, overflowY:"auto" }}>
+            <div ref={logRef} style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 95, overflowY: "auto" }}>
               {steps.map((s, i) => (
-                <div key={i} className="log-row" style={{ animationDelay:`${i*0.04}s` }}>
-                  <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#252535", flexShrink:0 }}>{s.ts}</span>
-                  <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10,
-                    color: s.msg.includes("✓") ? "#22c55e" : s.msg.includes("✗") ? "#ef4444" : "#484860" }}>
-                    {loading && i === steps.length-1 && !s.msg.includes("✓") && !s.msg.includes("✗")
+                <div key={i} className="log-row" style={{ animationDelay: `${i * 0.04}s` }}>
+                  <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", flexShrink: 0 }}>{s.ts}</span>
+                  <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.625rem",
+                    color: s.msg.includes("✓") ? "var(--accent)" : s.msg.includes("✗") ? "var(--accent-rare)" : "var(--ink-soft)" }}>
+                    {loading && i === steps.length - 1 && !s.msg.includes("✓") && !s.msg.includes("✗")
                       ? <span className="blink">{s.msg}</span> : s.msg}
                   </span>
                 </div>
@@ -436,31 +415,31 @@ export default function NewsDigestAgent() {
 
         {/* ── Error ── */}
         {error && (
-          <div style={{ marginTop:12, padding:"12px 14px", background:"#110707", border:"1px solid #220e0e", borderRadius:2 }}>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color:"#ef4444", marginBottom:3 }}>Error</div>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#6a2a2a" }}>{error}</div>
+          <div style={{ marginTop: "0.75rem", padding: "12px 14px", background: "color-mix(in srgb, var(--accent-rare) 6%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-rare) 20%, transparent)" }}>
+            <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.625rem", color: "var(--accent-rare)", marginBottom: 3 }}>Error</div>
+            <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--accent-rare)", opacity: 0.8 }}>{error}</div>
           </div>
         )}
 
         {/* ── Digest ── */}
         {sections.length > 0 && (
-          <div style={{ marginTop:28 }}>
-            <div style={{ borderTop:"1px solid #17172050", marginBottom:24 }} />
+          <div style={{ marginTop: "1.75rem" }}>
+            <div style={{ borderTop: "1px solid var(--rule)", marginBottom: "1.5rem" }} />
 
             {sections.map((sec, si) => (
-              <div key={si} className="fadein" style={{ marginBottom:32, animationDelay:`${si*0.1}s` }}>
+              <div key={si} className="fadein" style={{ marginBottom: "2rem", animationDelay: `${si * 0.1}s` }}>
 
                 {/* Section header */}
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
-                  <div style={{ width:3, height:16, background:currentSig.color, borderRadius:1, flexShrink:0 }} />
-                  <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, fontWeight:500, letterSpacing:"0.14em", textTransform:"uppercase", color:currentSig.color }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                  <div style={{ width: 3, height: 16, background: "var(--accent)", flexShrink: 0 }} />
+                  <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.625rem", fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent)" }}>
                     {sec.title}
                   </span>
-                  <div style={{ flex:1, height:1, background:"#14141c" }} />
+                  <div style={{ flex: 1, height: 1, background: "var(--rule)" }} />
                 </div>
 
                 {sec.stories.length === 0 && (
-                  <p style={{ fontFamily:"'Lato',sans-serif", fontSize:13, color:"#2d2d3a", fontStyle:"italic" }}>
+                  <p style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "0.8125rem", color: "var(--warm)", fontStyle: "italic" }}>
                     No stories parsed — try regenerating.
                   </p>
                 )}
@@ -469,89 +448,87 @@ export default function NewsDigestAgent() {
                   const expKey = `${si}-${si2}`;
                   const exp = explanations[expKey];
                   return (
-                  <div key={si2} className="story">
-                    <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:19, fontWeight:700, lineHeight:1.3, color:"#ede9e3", marginBottom: story.source ? 6 : 9, letterSpacing:"-0.01em" }}>
-                      {story.source
-                        ? <a href={story.source.url} target="_blank" rel="noopener noreferrer"
-                            style={{ color:"inherit", textDecoration:"none" }}
-                            className="headline-link">{story.headline}</a>
-                        : story.headline}
-                    </h2>
-                    {story.source && (
-                      <div style={{ marginBottom:9, display:"flex", alignItems:"center", gap:6 }}>
-                        <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:8, color:"#2d2d3a", textTransform:"uppercase", letterSpacing:"0.08em" }}>
-                          Source
-                        </span>
-                        <span style={{ width:1, height:10, background:"#232330" }} />
-                        <a href={story.source.url} target="_blank" rel="noopener noreferrer"
-                          style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:currentSig.color+"99", textDecoration:"none", letterSpacing:"0.02em" }}
-                          className="source-link">
-                          {story.source.name} ↗
-                        </a>
-                      </div>
-                    )}
-                    <p style={{ fontFamily:"'Lato',sans-serif", fontWeight:300, fontSize:14, lineHeight:1.75, color:"#6a6a82", marginBottom: story.why ? 11 : 0 }}>
-                      {story.body.join(" ")}
-                    </p>
-                    {story.why && (
-                      <div style={{ display:"flex", gap:10, alignItems:"flex-start", padding:"7px 12px", background:currentSig.color+"0c", borderLeft:`2px solid ${currentSig.color}38`, borderRadius:"0 2px 2px 0" }}>
-                        <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:8, color:currentSig.color, textTransform:"uppercase", letterSpacing:"0.1em", flexShrink:0, marginTop:3, fontWeight:500 }}>
-                          {currentSig.whyLabel}
-                        </span>
-                        <span style={{ fontFamily:"'Lato',sans-serif", fontSize:13, color:"#9090aa", lineHeight:1.55 }}>
-                          {story.why}
-                        </span>
-                      </div>
-                    )}
+                    <div key={si2} className="story">
+                      <h2 style={{ fontFamily: "var(--font-heading), serif", fontSize: "1.19rem", fontWeight: 600, lineHeight: 1.3, color: "var(--ink)", marginBottom: story.source ? "0.375rem" : "0.5625rem", letterSpacing: "-0.01em" }}>
+                        {story.source
+                          ? <a href={story.source.url} target="_blank" rel="noopener noreferrer"
+                              style={{ color: "inherit", textDecoration: "none" }}
+                              className="headline-link">{story.headline}</a>
+                          : story.headline}
+                      </h2>
+                      {story.source && (
+                        <div style={{ marginBottom: "0.5625rem", display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--warm)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                            Source
+                          </span>
+                          <span style={{ width: 1, height: 10, background: "var(--rule)" }} />
+                          <a href={story.source.url} target="_blank" rel="noopener noreferrer"
+                            style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--accent)", textDecoration: "none", letterSpacing: "0.02em" }}
+                            className="source-link">
+                            {story.source.name} ↗
+                          </a>
+                        </div>
+                      )}
+                      <p style={{ fontFamily: "var(--font-body), sans-serif", fontWeight: 300, fontSize: "0.875rem", lineHeight: 1.75, color: "var(--warm)", marginBottom: story.why ? "0.6875rem" : 0 }}>
+                        {story.body.join(" ")}
+                      </p>
+                      {story.why && (
+                        <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "7px 12px", background: "color-mix(in srgb, var(--accent) 6%, transparent)", borderLeft: "2px solid color-mix(in srgb, var(--accent) 30%, transparent)" }}>
+                          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em", flexShrink: 0, marginTop: 3, fontWeight: 500 }}>
+                            {currentSig.whyLabel}
+                          </span>
+                          <span style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "0.8125rem", color: "var(--ink-soft)", lineHeight: 1.55 }}>
+                            {story.why}
+                          </span>
+                        </div>
+                      )}
 
-                    {/* ── Explain simply button ── */}
-                    <div style={{ marginTop:10, display:"flex", justifyContent:"flex-end" }}>
-                      <button className="explain-btn"
-                        onClick={() => explainStory(expKey, story)}
-                        disabled={exp?.loading}>
-                        {exp?.loading
-                          ? <span className="blink">thinking…</span>
-                          : exp?.visible && exp?.text
-                            ? "▲ hide explanation"
-                            : "◎ explain simply"}
-                      </button>
-                    </div>
+                      {/* ── Explain simply ── */}
+                      <div style={{ marginTop: "0.625rem", display: "flex", justifyContent: "flex-end" }}>
+                        <button className="explain-btn"
+                          onClick={() => explainStory(expKey, story)}
+                          disabled={exp?.loading}>
+                          {exp?.loading
+                            ? <span className="blink">thinking…</span>
+                            : exp?.visible && exp?.text
+                              ? "▲ hide explanation"
+                              : "◎ explain simply"}
+                        </button>
+                      </div>
 
-                    {/* ── Explanation panel ── */}
-                    {exp?.visible && (
-                      <div style={{ marginTop:8, padding:"12px 14px", background:"#0f0f14", border:"1px solid #1e1e2a", borderRadius:2, animation:"fadeUp 0.25s ease forwards" }}>
-                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                            <span style={{ fontSize:10 }}>◎</span>
-                            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#4a9eff", textTransform:"uppercase", letterSpacing:"0.1em", fontWeight:500 }}>
+                      {/* ── Explanation panel ── */}
+                      {exp?.visible && (
+                        <div style={{ marginTop: "0.5rem", padding: "12px 14px", background: "var(--paper-2)", border: "1px solid var(--rule)", animation: "fadeUp 0.25s ease forwards" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                            <span style={{ fontSize: 10 }}>◎</span>
+                            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 500 }}>
                               Plain English
                             </span>
-                            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:8, color:"#252535", letterSpacing:"0.06em" }}>
+                            <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--warm)", letterSpacing: "0.06em" }}>
                               · Claude Haiku
                             </span>
                           </div>
+                          {exp.loading
+                            ? <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.625rem", color: "var(--warm)", paddingTop: 4 }} className="blink">
+                                Generating explanation…
+                              </div>
+                            : <p style={{ fontFamily: "var(--font-body), sans-serif", fontSize: "0.875rem", lineHeight: 1.7, color: "var(--ink-soft)", fontWeight: 300 }}>
+                                {exp.text}
+                              </p>}
                         </div>
-                        {exp.loading
-                          ? <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:10, color:"#333", paddingTop:4 }} className="blink">
-                              Generating explanation…
-                            </div>
-                          : <p style={{ fontFamily:"'Lato',sans-serif", fontSize:14, lineHeight:1.7, color:"#b0b0c8", fontWeight:300 }}>
-                              {exp.text}
-                            </p>}
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
             ))}
 
             {/* Footer */}
-            <div style={{ borderTop:"1px solid #14141c", paddingTop:12, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-              <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#242434", letterSpacing:"0.06em" }}>
+            <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "0.75rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.06em" }}>
                 Claude · {currentSig.label} · {new Date().toLocaleTimeString()}
                 <a href="https://github.com/fde-shipit/ai-news-agent" target="_blank" rel="noopener noreferrer"
-                  style={{ color:"#2a2a3a", textDecoration:"none", marginLeft:14 }}>
+                  style={{ color: "var(--warm)", textDecoration: "none", marginLeft: 14, opacity: 0.5 }}>
                   github.com/fde-shipit/ai-news-agent ↗
                 </a>
               </span>
@@ -564,11 +541,11 @@ export default function NewsDigestAgent() {
 
         {/* ── Empty state ── */}
         {!done && !loading && steps.length === 0 && (
-          <div style={{ marginTop:44, textAlign:"center" }}>
-            <div style={{ fontFamily:"'Playfair Display',serif", fontSize:15, fontStyle:"italic", color:"#252538", marginBottom:6 }}>
+          <div style={{ marginTop: "2.75rem", textAlign: "center" }}>
+            <div style={{ fontFamily: "var(--font-heading), serif", fontSize: "0.94rem", fontStyle: "italic", color: "var(--warm)", marginBottom: 6 }}>
               Pick a signal type and generate your digest
             </div>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#1a1a28", letterSpacing:"0.08em", textTransform:"uppercase" }}>
+            <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--pale)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
               Real web searches · Claude analysis · Live
             </div>
           </div>
