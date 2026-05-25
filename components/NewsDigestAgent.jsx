@@ -131,6 +131,14 @@ Source: [Publication / Site](https://actual-url.com)
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PRESETS = ["AI", "Technology", "Finance", "Climate", "Science", "Health", "Space"];
 
+const SIGNAL_DESCRIPTIONS = {
+  news:      "Breaking news, last 48 hours. Named sources, key figures, why it matters.",
+  pulse:     "What's exploding on GitHub and HN right now. Repos, launches, momentum.",
+  longform:  "Substacks and essays worth your time. Arguments, not headlines.",
+  research:  "Papers and breakthroughs from arxiv and journals. Last 30 days.",
+  synthesis: "Hidden threads linking your topics. Patterns others haven't spotted yet.",
+};
+
 // ─── Parser ───────────────────────────────────────────────────────────────────
 function parseDigest(text) {
   const sections = [];
@@ -174,7 +182,6 @@ function parseDigest(text) {
 export default function NewsDigestAgent() {
   const [topics, setTopics]             = useState(["AI", "Technology"]);
   const [signalId, setSignalId]         = useState("news");
-  const [inputVal, setInputVal]         = useState("");
   const [loading, setLoading]           = useState(false);
   const [sections, setSections]         = useState([]);
   const [steps, setSteps]               = useState([]);
@@ -216,7 +223,6 @@ export default function NewsDigestAgent() {
   const addTopic = (t) => {
     const s = t.trim().slice(0, 24);
     if (s && !topics.includes(s) && topics.length < 5) setTopics(p => [...p, s]);
-    setInputVal("");
   };
   const removeTopic = (t) => setTopics(p => p.filter(x => x !== t));
   const log = (msg) => setSteps(p => [...p, {
@@ -292,10 +298,7 @@ export default function NewsDigestAgent() {
         .gen-btn:disabled { opacity:0.4; cursor:not-allowed; }
         .gen-btn:not(:disabled):hover { opacity:0.84; }
 
-        .topic-input { background:transparent; border:none; outline:none; color:var(--ink); font-family:var(--font-mono),monospace; font-size:0.6rem; width:100px; }
-        .topic-input::placeholder { color:var(--pale); }
-
-        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .fadein { animation:fadeUp 0.4s ease forwards; opacity:0; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
         .blink { animation:blink 1.5s ease-in-out infinite; }
@@ -346,13 +349,6 @@ export default function NewsDigestAgent() {
                 {t} <span style={{ opacity: 0.4, fontSize: 13 }}>×</span>
               </span>
             ))}
-            {topics.length < 5 && (
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 8px", border: "1px dashed var(--rule-strong)" }}>
-                <input className="topic-input" placeholder="add topic…" value={inputVal}
-                  onChange={e => setInputVal(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addTopic(inputVal); } }} />
-              </span>
-            )}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {PRESETS.map(p => (
@@ -381,7 +377,7 @@ export default function NewsDigestAgent() {
             ))}
           </div>
           <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", marginTop: "0.5rem", letterSpacing: "0.04em" }}>
-            {currentSig.tagline}
+            {SIGNAL_DESCRIPTIONS[signalId]}
           </div>
         </div>
 
