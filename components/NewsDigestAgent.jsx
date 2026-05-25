@@ -129,7 +129,7 @@ Source: [Publication / Site](https://actual-url.com)
 ];
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const PRESETS = ["AI", "Technology", "Finance", "Climate", "Geopolitics", "Science", "Health", "Space", "Crypto", "Defence"];
+const PRESETS = ["AI", "Technology", "Finance", "Climate", "Science", "Health", "Space"];
 
 // ─── Parser ───────────────────────────────────────────────────────────────────
 function parseDigest(text) {
@@ -524,17 +524,22 @@ export default function NewsDigestAgent() {
             ))}
 
             {/* Footer */}
-            <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "0.75rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.06em" }}>
-                Claude · {currentSig.label} · {new Date().toLocaleTimeString()}
-                <a href="https://github.com/fde-shipit/ai-news-agent" target="_blank" rel="noopener noreferrer"
-                  style={{ color: "var(--warm)", textDecoration: "none", marginLeft: 14, opacity: 0.5 }}>
-                  github.com/fde-shipit/ai-news-agent ↗
-                </a>
-              </span>
-              <button className="refresh-btn" onClick={generate} disabled={loading}>
-                {loading ? "Running…" : "Refresh"}
-              </button>
+            <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "0.75rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.06em" }}>
+                  Claude · {currentSig.label} · {new Date().toLocaleTimeString()}
+                  <a href="https://github.com/fde-shipit/ai-news-agent" target="_blank" rel="noopener noreferrer"
+                    style={{ color: "var(--warm)", textDecoration: "none", marginLeft: 14, opacity: 0.5 }}>
+                    github.com/fde-shipit/ai-news-agent ↗
+                  </a>
+                </span>
+                <button className="refresh-btn" onClick={generate} disabled={loading}>
+                  {loading ? "Running…" : "Refresh"}
+                </button>
+              </div>
+              <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.04em", opacity: 0.6, lineHeight: 1.5 }}>
+                Some sources — including paywalled publications and LinkedIn — cannot be accessed directly. Results reflect what&apos;s publicly available.
+              </p>
             </div>
           </div>
         )}
