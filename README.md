@@ -51,7 +51,7 @@ You'll need [Node.js](https://nodejs.org) (LTS) and an Anthropic API key (see be
    ```
 5. Open [localhost:3000](http://localhost:3000).
 
-For a full deployment walkthrough, see [martina-edwards.vercel.app](https://martina-edwards.vercel.app).
+For a full deployment walkthrough, see the [Windows setup guide](https://martina-edwards.vercel.app/setup-guide-windows.html).
 
 ---
 
