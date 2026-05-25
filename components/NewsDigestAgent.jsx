@@ -343,10 +343,6 @@ export default function NewsDigestAgent() {
           </div>
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "#282838", textAlign: "right", letterSpacing: "0.04em" }}>
             <div>{dateStr}</div>
-            <button onClick={() => setApiKey("")}
-              style={{ background:"transparent", border:"none", color:"#252535", cursor:"pointer", fontFamily:"'IBM Plex Mono',monospace", fontSize:8, letterSpacing:"0.06em", marginTop:4, padding:0, textDecoration:"underline" }}>
-              change key
-            </button>
           </div>
         </div>
       </div>
@@ -554,6 +550,10 @@ export default function NewsDigestAgent() {
             <div style={{ borderTop:"1px solid #14141c", paddingTop:12, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:9, color:"#242434", letterSpacing:"0.06em" }}>
                 Claude · {currentSig.label} · {new Date().toLocaleTimeString()}
+                <a href="https://github.com/fde-shipit/ai-news-agent" target="_blank" rel="noopener noreferrer"
+                  style={{ color:"#2a2a3a", textDecoration:"none", marginLeft:14 }}>
+                  github.com/fde-shipit/ai-news-agent ↗
+                </a>
               </span>
               <button className="refresh-btn" onClick={generate} disabled={loading}>
                 {loading ? "Running…" : "Refresh"}
