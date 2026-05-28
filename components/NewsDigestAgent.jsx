@@ -230,7 +230,7 @@ export default function NewsDigestAgent() {
         body: JSON.stringify({ headline: story.headline, body: story.body.join(" ") }),
       });
       const data = await res.json();
-      const text = data.content?.filter(b => b.type === "text").map(b => b.text).join("") || "Could not generate explanation.";
+      const text = data.text || data.error || "Could not generate explanation.";
       setExplanations(p => ({ ...p, [key]: { text, loading: false, visible: true } }));
     } catch {
       setExplanations(p => ({ ...p, [key]: { text: "Could not load explanation.", loading: false, visible: true } }));
@@ -239,7 +239,7 @@ export default function NewsDigestAgent() {
 
   const addTopic = (t) => {
     const s = t.trim().slice(0, 24);
-    if (s && !topics.includes(s) && topics.length < 5) setTopics(p => [...p, s]);
+    if (s && !topics.includes(s) && topics.length < 2) setTopics(p => [...p, s]);
   };
   const removeTopic = (t) => setTopics(p => p.filter(x => x !== t));
   const log = (msg) => setSteps(p => [...p, {
@@ -356,7 +356,7 @@ export default function NewsDigestAgent() {
         {/* ── Topics ── */}
         <div style={{ marginBottom: "1rem" }}>
           <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.56rem", color: "var(--warm)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
-            Topics <span style={{ color: "var(--pale)" }}>— up to 5, click to remove</span>
+            Topics <span style={{ color: "var(--pale)" }}>— up to 2, click to remove</span>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: "0.5rem", alignItems: "center" }}>
             {topics.map((t) => (
