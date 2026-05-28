@@ -6,7 +6,7 @@ A good starter project if you're learning to build with the Anthropic API.
 
 ---
 
-![Screenshot placeholder — replace with a screenshot of the app](docs/screenshot.png)
+![The Digest — AI news agent UI showing the Connect signal with agent log and digest output](docs/screenshot.png)
 
 ---
 
