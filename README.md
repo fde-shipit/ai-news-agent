@@ -30,6 +30,8 @@ Live demo: [ai-news-agent-gules.vercel.app](https://ai-news-agent-gules.vercel.a
 
 ## Quick start
 
+New to this? Follow the [step-by-step Windows setup guide](https://martina-edwards.vercel.app/setup-guide-windows.html) — accounts, Node.js, Git, and first deploy, all covered.
+
 You'll need [Node.js](https://nodejs.org) (LTS) and an Anthropic API key.
 
 **Get an API key**
